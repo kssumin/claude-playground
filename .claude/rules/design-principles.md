@@ -20,20 +20,8 @@
 - MUST: 기본은 정규화, 성능 병목 증명 후 비정규화
 - SHOULD: Soft Delete 사용 전 3가지 질문 (쿼리 누락, UNIQUE 충돌, 개인정보 규정)
 
-## 안티패턴 (레드 플래그)
-| 안티패턴 | 해결 |
-|----------|------|
-| God Service (10개+ 메서드) | UseCase 분리 |
-| Anemic Domain | 로직을 Entity로 이동 |
-| Leaky Abstraction | Port 인터페이스로 추상화 |
-| Premature Optimization | 규모 추정 먼저 |
-| Config in Code | @ConfigurationProperties 외부화 |
-
 ## 설계 결정 사고 순서
-1. 가장 단순한 해법은? (YAGNI)
-2. 단순한 해법의 한계는? (규모 추정)
-3. 복잡도 올릴 때 트레이드오프는?
-4. 나중에 바꿀 수 있는가? (가역성)
+1. 가장 단순한 해법은? (YAGNI) → 2. 한계는? (규모 추정) → 3. 트레이드오프? → 4. 가역성?
 
 ## 상세 가이드
-BAD/GOOD 코드 예시, 상태 코드 테이블, ISP 예시는 `design-principles-reference` 스킬을 참조하라.
+안티패턴 테이블, BAD/GOOD 코드 예시, 상태 코드 테이블, ISP 예시는 `design-principles-reference` 스킬을 참조하라.
