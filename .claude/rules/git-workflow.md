@@ -2,7 +2,7 @@
 
 ## 커밋 메시지 형식
 
-**제목 한 줄만. Body 없음. Co-Authored-By 없음.**
+**MUST: 커밋은 반드시 `/commit` 스킬로 실행. 직접 `git commit` 금지.**
 
 ```
 <type>: <한국어 간결한 설명>
