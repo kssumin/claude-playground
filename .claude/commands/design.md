@@ -21,6 +21,27 @@ allowed-tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash", "Task", "AskUse
 
 ---
 
+## Step 0: 컨텍스트 자동 수집 (Silent)
+
+사용자에게 출력하지 않고 조용히 수집한다.
+
+1. 기존 코드/모듈 구조 파악
+2. 기존 ADR 확인 (`docs/adr/`)
+3. 인프라 현황 (docker-compose.yml, application.yml)
+4. **복리화 문서 검색** (`docs/solutions/`):
+   - 요구사항 키워드로 YAML frontmatter의 `tags`와 `trigger` 매칭
+   - 관련 솔루션 발견 시 Step 1에서 함께 공유:
+     ```
+     📚 관련 과거 솔루션:
+     - docs/solutions/2026-03-03-kafka-consumer-idempotency.md
+       → Kafka Consumer 멱등성 처리 (Redis SET NX + TTL)
+     - docs/solutions/2026-03-10-redis-distributed-lock.md
+       → 분산 락 패턴 (Redisson)
+     ```
+   - 발견된 솔루션의 교훈/패턴을 이후 설계 결정에 반영
+
+---
+
 ## Step 1: 요구사항 확인
 
 brainstorming에서 확정된 요구사항을 정리한다.
