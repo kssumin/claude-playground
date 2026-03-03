@@ -1,6 +1,7 @@
 # 테스트 요구사항
 
 ## 핵심 원칙
+- MUST: 테스트 코드를 먼저 작성하고, 테스트 통과 후에 구현과 함께 커밋한다. 테스트 없는 구현 커밋 금지
 - MUST: 최소 커버리지 80%. Unit Test + Integration Test 모두 필수
 - MUST: TDD — RED(테스트 먼저) → GREEN(최소 구현) → IMPROVE(리팩토링) → 커버리지 확인
 - MUST: E2E 테스트가 TDD의 최외곽 RED. 컴포넌트 구현 후 E2E GREEN 확인 없이 완료 선언 금지

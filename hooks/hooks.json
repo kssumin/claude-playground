@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"(\\\\./gradlew bootRun|gradle bootRun)\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/hooks/scripts/hooks/check-dev-server.js\""
+          }
+        ],
+        "description": "개발 서버 실행 시 Docker/tmux 권장"
+      },
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"docker-compose up$|docker compose up$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"console.error('[Hook] 팁: 백그라운드 실행은 docker-compose up -d')\""
+          }
+        ],
+        "description": "docker-compose 백그라운드 실행 권장"
+      },
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"git push\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"console.error('[Hook] Push 전 변경사항을 확인하세요')\""
+          }
+        ],
+        "description": "git push 전 리뷰 알림"
+      },
+      {
+        "matcher": "tool == \"Write\" && tool_input.file_path matches \"\\\\.(md|txt)$\" && !(tool_input.file_path matches \"README\\\\.md|CLAUDE\\\\.md|AGENTS\\\\.md|CONTRIBUTING\\\\.md|CHANGELOG\\\\.md|ADR-\")",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const i=JSON.parse(d);const p=i.tool_input?.file_path||'';if(/\\.(md|txt)$/.test(p)&&!/(README|CLAUDE|AGENTS|CONTRIBUTING|CHANGELOG)\\.md$/.test(p)&&!/ADR-/.test(p)){console.error('[Hook] 불필요한 문서 파일 생성이 감지되었습니다: '+p);console.error('[Hook] README.md 또는 기존 문서에 추가하는 것을 권장합니다')}console.log(d)})\""
+          }
+        ],
+        "description": "불필요한 .md 파일 생성 경고 (ADR 제외)"
+      },
+      {
+        "matcher": "tool == \"Edit\" || tool == \"Write\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/hooks/scripts/hooks/suggest-compact.js\""
+          }
+        ],
+        "description": "주기적으로 /compact 제안"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"gh pr create\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const i=JSON.parse(d);const cmd=i.tool_input?.command||'';if(/gh pr create/.test(cmd)){const out=i.tool_output?.output||'';const m=out.match(/https:\\/\\/github[^\\s]+\\/pull\\/\\d+/);if(m){console.error('[Hook] PR 생성됨: '+m[0])}}console.log(d)})\""
+          }
+        ],
+        "description": "PR 생성 후 URL 표시"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.(kt)$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const fs=require('fs');let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const i=JSON.parse(d);const p=i.tool_input?.file_path;if(p&&fs.existsSync(p)){const c=fs.readFileSync(p,'utf8');const lines=c.split('\\n');const matches=[];lines.forEach((l,idx)=>{if(/\\bprintln\\b/.test(l)&&!/\\/\\//.test(l.split('println')[0]))matches.push((idx+1)+': '+l.trim())});if(matches.length){console.error('[Hook] println 발견: '+p);matches.slice(0,5).forEach(m=>console.error(m));console.error('[Hook] 커밋 전 println을 제거하세요')}}console.log(d)})\""
+          }
+        ],
+        "description": "Kotlin 파일에서 println 경고"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.(java)$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const fs=require('fs');let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const i=JSON.parse(d);const p=i.tool_input?.file_path;if(p&&fs.existsSync(p)){const c=fs.readFileSync(p,'utf8');const lines=c.split('\\n');const matches=[];lines.forEach((l,idx)=>{if(/System\\.out\\.print/.test(l))matches.push((idx+1)+': '+l.trim())});if(matches.length){console.error('[Hook] System.out.print 발견: '+p);matches.slice(0,5).forEach(m=>console.error(m));console.error('[Hook] 커밋 전 디버그 출력을 제거하세요')}}console.log(d)})\""
+          }
+        ],
+        "description": "Java 파일에서 System.out.print 경고"
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/hooks/scripts/hooks/pre-compact.js\""
+          }
+        ],
+        "description": "컨텍스트 압축 전 상태 저장"
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/hooks/scripts/hooks/session-start.js\""
+          }
+        ],
+        "description": "세션 시작 시 프로젝트 정보 로드"
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/hooks/scripts/hooks/session-end.js\""
+          }
+        ],
+        "description": "세션 종료 시 상태 저장"
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/hooks/scripts/hooks/check-debug-logs.js\""
+          }
+        ],
+        "description": "응답 후 디버그 로그 검사"
+      }
+    ]
+  }
+}
