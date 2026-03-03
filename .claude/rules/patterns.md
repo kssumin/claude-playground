@@ -15,9 +15,12 @@
 - NEVER: Controller나 Repository에 비즈니스 로직 작성 금지
 
 ## Idempotency Key Pattern
-- 상태 변경 API(POST/PUT/PATCH/DELETE)에 적용
-- 흐름: Idempotency-Key 헤더 → 기존 결과 있으면 반환, 없으면 처리 후 저장
-- Redis + @ConfigurationProperties TTL로 구현
+- 상태 변경 API에 적용. 흐름: 헤더 → 기존 결과 있으면 반환, 없으면 처리 후 저장
+- MUST: 세부 정책 결정 — 생성 주체(클라이언트/서버), 유일성 범위(글로벌/사용자), 포맷
+
+## 방어 장치 에러 경로
+- MUST: 방어 장치(UNIQUE, 검증) 추가 시, 위반 시 사용자 응답까지 구현 (500 방치 금지)
+- MUST: DB 제약 위반 예외는 infra에서 catch → 도메인 예외 변환
 
 ## Domain Exception Pattern
 - sealed class로 정의 (NotFound, AlreadyExists, InvalidState, AccessDenied)
