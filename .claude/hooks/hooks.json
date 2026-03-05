@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/hooks/scripts/hooks/check-dev-server.js\""
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/check-dev-server.js\""
           }
         ],
         "description": "개발 서버 실행 시 Docker/tmux 권장"
@@ -47,7 +47,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/hooks/scripts/hooks/suggest-compact.js\""
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/suggest-compact.js\""
           }
         ],
         "description": "주기적으로 /compact 제안"
@@ -91,7 +91,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/hooks/scripts/hooks/pre-compact.js\""
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/pre-compact.js\""
           }
         ],
         "description": "컨텍스트 압축 전 상태 저장"
@@ -103,7 +103,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/hooks/scripts/hooks/session-start.js\""
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/session-start.js\""
           }
         ],
         "description": "세션 시작 시 프로젝트 정보 로드"
@@ -115,7 +115,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/hooks/scripts/hooks/session-end.js\""
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/session-end.js\""
           }
         ],
         "description": "세션 종료 시 상태 저장"
@@ -127,7 +127,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/hooks/scripts/hooks/check-debug-logs.js\""
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/check-debug-logs.js\""
           }
         ],
         "description": "응답 후 디버그 로그 검사"
