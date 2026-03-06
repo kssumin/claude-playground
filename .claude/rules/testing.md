@@ -6,6 +6,7 @@
 - MUST: TDD — RED(테스트 먼저) → GREEN(최소 구현) → IMPROVE(리팩토링) → 커버리지 확인
 - MUST: E2E 테스트가 TDD의 최외곽 RED. 컴포넌트 구현 후 E2E GREEN 확인 없이 완료 선언 금지
 - MUST: 인프라 파이프라인(CDC, 메시지 큐, 외부 API) 포함 기능은 Testcontainers E2E 검증 필수
+- MUST: 테스트로 검증 불가한 항목 발견 시 → 시뮬레이션/주석으로 넘기지 말고 **사용자에게 검증 방안 합의** 필수 (예: Testcontainers에서 Debezium CDC 재현 불가 → smoke-test.sh로 실제 인프라 검증)
 - MUST: 프레임워크 — JUnit 5 + MockK + AssertJ + Testcontainers + WireMock
 
 ## 테스트 3분류 (토스 전략)

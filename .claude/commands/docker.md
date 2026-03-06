@@ -1,6 +1,6 @@
 ---
 name: docker
-description: "Docker 인프라 관리 (시작/중지/초기화/상태확인)"
+description: "Docker 인프라 관리 (시작/중지/초기화/정리/상태확인). Use when user says 'docker', '도커', '인프라 시작', '인프라 중지', '도커 정리', '리소스 정리', 'prune', 'clean', 'nuke', 'down'"
 allowed-tools: ["Bash", "Read"]
 ---
 
@@ -17,7 +17,7 @@ allowed-tools: ["Bash", "Read"]
 | up | 인프라 시작 (`docker-compose up -d`) |
 | down | 컨테이너 중지 |
 | reset | 컨테이너 중지 + 볼륨 삭제 (데이터 초기화) |
-| nuke | 전부 삭제 (컨테이너 + 볼륨 + 이미지) |
+| nuke | 전부 삭제 (컨테이너 + 볼륨 + 이미지 + 캐시) |
 | logs [서비스] | 로그 확인 (예: `logs kafka`) |
 
 ## Workflow
@@ -47,9 +47,14 @@ docker-compose down -v
 ```
 
 ### nuke
-사용자에게 "이미지까지 삭제되어 재다운로드 필요합니다" 확인 후:
+사용자에게 "이미지, 볼륨, 빌드 캐시까지 전부 삭제됩니다. 재다운로드 필요합니다" 확인 후:
 ```bash
+# 1. compose 리소스 정리
 docker-compose down -v --rmi all
+# 2. 시스템 전체 정리 (dangling 이미지, 미사용 볼륨, 빌드 캐시)
+docker system prune -a --volumes -f
+# 3. 결과 확인
+docker system df
 ```
 
 ### logs
