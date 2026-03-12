@@ -1,5 +1,10 @@
 # Git Workflow
 
+## 핵심 원칙
+
+- NEVER: 사용자 명시적 요청 없이 commit/push 자동 실행 금지
+- MUST: `git reset`으로 커밋 되돌릴 때 기본값은 `--soft`. `--hard`는 명시적 요청 시에만
+
 ## 커밋 메시지 형식
 
 **MUST: 커밋은 반드시 `/commit` 스킬로 실행. 직접 `git commit` 금지.**
