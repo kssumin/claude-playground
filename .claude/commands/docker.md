@@ -15,8 +15,8 @@ allowed-tools: ["Bash", "Read"]
 |------|------|
 | (없음), status | 컨테이너/볼륨 상태 확인 |
 | up | 인프라 시작 (`docker-compose up -d`) |
-| down | 컨테이너 중지 |
-| reset | 컨테이너 중지 + 볼륨 삭제 (데이터 초기화) |
+| down | 컨테이너 + 볼륨 삭제 |
+| reset | 컨테이너 + 볼륨 삭제 (down과 동일, 명시적 초기화 용도) |
 | nuke | 전부 삭제 (컨테이너 + 볼륨 + 이미지 + 캐시) |
 | logs [서비스] | 로그 확인 (예: `logs kafka`) |
 
@@ -37,7 +37,7 @@ docker-compose ps
 
 ### down
 ```bash
-docker-compose down
+docker-compose down -v
 ```
 
 ### reset
@@ -61,6 +61,30 @@ docker system df
 ```bash
 docker-compose logs -f --tail=50 [서비스명]
 ```
+
+## scripts/ 생성 규칙
+
+**새 프로젝트 셋업 또는 인프라 초기 구성 시 반드시 두 스크립트를 생성한다:**
+
+### scripts/up.sh
+```
+1. docker compose up -d
+2. healthcheck 대기 (최대 60초)
+3. 각 앱 모듈 nohup ./gradlew :모듈명:bootRun > logs/모듈명.log 2>&1 &
+4. 각 앱 actuator/health 응답 대기 (최대 60초)
+5. 완료 메시지 출력 (포트, 로그 경로, 종료 명령)
+```
+
+### scripts/down.sh
+```
+1. 각 앱 모듈 PID kill -15 (ps aux | grep java | grep "모듈명/build")
+2. docker compose down -v
+```
+
+**생성 기준:**
+- 앱 모듈이 2개 이상이고 docker compose가 있는 프로젝트
+- 기존 scripts/ 디렉토리가 없을 때 함께 생성
+- 포트는 application.yml에서 확인, 없으면 Spring Boot 기본값(8080) 사용
 
 ## 원칙
 - `reset`, `nuke`는 반드시 사용자 확인 후 실행

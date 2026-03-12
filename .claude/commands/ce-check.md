@@ -5,7 +5,7 @@ description: Context Engineering 헬스체크. Rules/Skills/Memory 상태를 자
 
 # Context Engineering 헬스체크
 
-아래 8개 항목을 순서대로 검사하고 결과를 테이블로 보고하라.
+아래 9개 항목을 순서대로 검사하고 결과를 테이블로 보고하라.
 
 ## 검사 항목
 
@@ -38,7 +38,11 @@ description: Context Engineering 헬스체크. Rules/Skills/Memory 상태를 자
 - `memory/decisions.jsonl`과 `memory/failures.jsonl` 존재 여부 확인
 - 기준: **모두 존재** → PASS, 누락 → WARN (생성 권장)
 
-### 8. 결과 요약
+### 8. failures.jsonl 상태 확인
+- `memory/failures.jsonl` 줄수(=incident 수) 확인
+- 기준: **3개 이상** → PASS, 1–2개 → WARN ("incidents 부족, debug 샘플링 필요"), 0개 → FAIL
+
+### 9. 결과 요약
 
 검사 결과를 아래 형식으로 테이블 출력:
 
@@ -52,6 +56,7 @@ description: Context Engineering 헬스체크. Rules/Skills/Memory 상태를 자
 | 5 | Skill frontmatter | PASS/FAIL | {누락 파일} |
 | 6 | MEMORY.md 줄수 | PASS/WARN | {N}줄 / 200줄 |
 | 7 | Memory 파일 존재 | PASS/WARN | {누락 파일} |
+| 8 | failures.jsonl 상태 | PASS/WARN/FAIL | {N}개 incidents |
 ```
 
 - 모든 항목 PASS → "ALL PASS" 표시
