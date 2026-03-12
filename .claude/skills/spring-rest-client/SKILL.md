@@ -142,8 +142,13 @@ sealed class ExternalApiException(
 dependencies {
     implementation("io.github.resilience4j:resilience4j-spring-boot3")
     implementation("io.github.resilience4j:resilience4j-kotlin")
+    implementation("io.github.resilience4j:resilience4j-micrometer") // CB 상태 Prometheus 노출 (필수)
 }
 ```
+
+> **MUST**: `resilience4j-micrometer`는 CB 있는 서비스에 처음부터 포함한다.
+> 없으면 CB가 OPEN/CLOSED인지 Prometheus에서 볼 수 없어 장애 시 추측으로만 진단하게 된다.
+> `resilience4j_circuitbreaker_state`, `resilience4j_circuitbreaker_failure_rate` 메트릭이 노출된다.
 
 ### application.yml
 ```yaml
@@ -224,10 +229,12 @@ class PaymentClient(
 
 ## 어노테이션 적용 순서
 
+> 공식 문서: https://resilience4j.readme.io/docs/getting-started-3#aspect-order
+
 Resilience4j 어노테이션 적용 순서 (바깥 → 안쪽):
 
 ```
-Retry → CircuitBreaker → TimeLimiter → Bulkhead
+Retry → CircuitBreaker → RateLimiter → Bulkhead → TimeLimiter
 ```
 
 실행 순서 (안쪽 → 바깥쪽):
@@ -241,6 +248,32 @@ Retry → CircuitBreaker → TimeLimiter → Bulkhead
 @TimeLimiter(name = "payment")              // 1. 타임아웃 체크
 fun requestPayment(...): PaymentResult { ... }
 ```
+
+## 프로그래매틱 데코레이터 순서 (MUST)
+
+> 공식 문서: https://resilience4j.readme.io/docs/getting-started-3#decorating-and-executing-a-functional-interface
+
+**MUST**: `Retry.decorateCheckedSupplier` 가 바깥, `CircuitBreaker.decorateCheckedSupplier` 가 안쪽
+
+```kotlin
+// GOOD: Retry(CB(f)) — 공식 권장 순서
+val response = Retry.decorateCheckedSupplier(mockSendApiRetry) {
+    CircuitBreaker.decorateCheckedSupplier(mockSendApiCircuitBreaker) {
+        callApi(request)
+    }.get()
+}.get()
+
+// BAD: CB(Retry(f)) — NEVER 사용
+// - CB가 실패를 늦게 감지 (모든 재시도 소진 후에야 failure 1건 기록)
+// - CB OPEN 시에도 내부 Retry가 callApi를 계속 호출 → retry storm 방지 효과 없음
+val response = CircuitBreaker.decorateCheckedSupplier(cb) {
+    Retry.decorateCheckedSupplier(retry) {
+        callApi(request)
+    }.get()
+}.get()
+```
+
+**이유**: Retry가 바깥이어야 CB가 각 시도의 실패를 즉시 기록하고, CB OPEN 시 `CallNotPermittedException`이 Retry로 전파되어 재시도가 즉시 중단됨.
 
 ## 요청/응답 DTO (client-external 내부)
 

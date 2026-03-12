@@ -137,10 +137,39 @@ After: HttpComponentsClientHttpRequestFactory (maxTotal=100, maxPerRoute=20)
 1. **DB/Redis 클린** (매 테스트 전 필수)
 2. **Smoke 테스트** → 100% 통과 확인
 3. **Load 테스트** → summary 보존
-4. **Grafana 캡처** → 개별 패널 PNG
+4. **⛔ Grafana 캡처 즉시 실행** → load 완료 직후 `perf-tuning-cycle` Step 1.5 명령 실행
 5. **Prometheus 지표** → 숫자 기록
 
 캡처 디렉토리: `docs/perf-reports/{date}-action-{id}/`
+
+### ⛔ load 완료 직후 반드시 실행 (분석보다 먼저)
+
+```bash
+# load 완료 즉시 — 이 명령을 실행하지 않으면 Step 5로 진행 불가
+DIR="docs/perf-reports/{date}-action-{id}"
+mkdir -p "$DIR"
+
+python3 -c "
+import subprocess, os
+dir='$DIR'
+uid='spring_boot_21'; slug='spring-boot-3-x-statistics'
+TM='from=now-6m&to=now&width=1200&height=400&kiosk&theme=light'
+BASE=f'http://admin:admin@localhost:3000/render/d-solo/{uid}/{slug}'
+API='orgId=1&var-application=alarm-api&var-instance=host.docker.internal%3A8080&var-hikaricp=HikariPool-1'
+CON='orgId=1&var-application=alarm-consumer&var-instance=host.docker.internal%3A8082&var-hikaricp=HikariPool-1'
+panels=[(API,'36','api-hikaricp-connections.png'),(API,'2','api-response-time.png'),(API,'68','api-threads.png'),(CON,'36','consumer-hikaricp-connections.png'),(CON,'68','consumer-threads.png')]
+for vars,pid,name in panels:
+    r=subprocess.run(['curl','-sf',f'{BASE}?{vars}&panelId={pid}&{TM}','-o',f'{dir}/{name}'],capture_output=True)
+    size=os.path.getsize(f'{dir}/{name}') if os.path.exists(f'{dir}/{name}') else 0
+    print(f'{name}: {\"OK\" if r.returncode==0 and size>1000 else \"FAIL\"}')
+"
+cp perf-test/results/{date}-action-{id}/k6-summary.json "$DIR/"
+
+# 캡처 확인 — 5개 미만이면 Step 5 진입 금지
+COUNT=$(ls "$DIR"/*.png 2>/dev/null | wc -l)
+echo "PNG 캡처 수: $COUNT"
+[ "$COUNT" -ge 5 ] && echo "✅ 캡처 완료 — Step 5 진행 가능" || echo "⛔ 캡처 부족 — 재실행 필요"
+```
 
 ## Step 5: 판정
 
