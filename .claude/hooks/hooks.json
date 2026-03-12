@@ -3,6 +3,16 @@
   "hooks": {
     "PreToolUse": [
       {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.kt$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/kotlin-compile-pre.js\""
+          }
+        ],
+        "description": "Kotlin 파일 편집 전 이전 컴파일 실패 결과 확인"
+      },
+      {
         "matcher": "tool == \"Bash\" && tool_input.command matches \"(\\\\./gradlew bootRun|gradle bootRun)\"",
         "hooks": [
           {
@@ -54,6 +64,26 @@
       }
     ],
     "PostToolUse": [
+      {
+        "matcher": "tool == \"Edit\" || tool == \"Write\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/loop-detect.js\""
+          }
+        ],
+        "description": "동일 파일 반복 편집 감지 (5회 이상 경고)"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.kt$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/kotlin-compile-check.js\""
+          }
+        ],
+        "description": "Kotlin 파일 편집 후 백그라운드 컴파일 체크 트리거"
+      },
       {
         "matcher": "tool == \"Bash\" && tool_input.command matches \"gh pr create\"",
         "hooks": [
