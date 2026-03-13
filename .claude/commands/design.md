@@ -203,7 +203,7 @@ BLOCK/WARN/PASS 판정을 내린다.
 독립 리뷰를 통과하면 ADR 문서를 자동 생성:
 1. `docs/adr/` 디렉토리에 ADR 파일 생성
 2. 번호 자동 부여 (기존 ADR 번호 확인)
-3. 아래 ADR 템플릿에 따라 작성
+3. **`adr-template` 스킬의 템플릿과 작성 원칙을 따라 작성** (핵심 원칙 10개 + 체크리스트 준수)
 
 ---
 
@@ -214,107 +214,6 @@ BLOCK/WARN/PASS 판정을 내린다.
 3. 독립 리뷰 결과 제시 (BLOCK/WARN/PASS)
 4. 다음 단계 안내 (`/plan`으로 구현 계획 작성)
 5. **CONFIRM** 대기
-
----
-
-## ADR Template
-
-```markdown
-# ADR-{번호}: {제목}
-
-## Status
-Proposed
-
-## Date
-{YYYY-MM-DD}
-
-## Context
-{이 결정이 필요한 배경과 문제 상황}
-
-## Decision
-{선택한 접근법과 구체적인 설계 결정}
-
-### 모듈별 변경사항
-- **domain**: {변경 내용}
-- **infra**: {변경 내용}
-- **app-api**: {변경 내용}
-- **common**: {변경 내용 또는 "변경 없음"}
-- **client-external**: {변경 내용 또는 "변경 없음"}
-
-### 인프라 변경사항
-- **docker-compose.yml**: {추가/변경할 서비스 또는 "변경 없음"}
-- **설정 파일**: {application.yml 변경사항}
-- **환경 변수**: {.env.example 추가 항목}
-
-### 핵심 설계
-{주요 클래스, 인터페이스, 데이터 모델, API 설계}
-
-### 아키텍처 결정
-
-#### 용량/규모 추정 (필수)
-- **예상 데이터**: {레코드 수, 저장 용량}
-- **예상 트래픽**: {읽기 TPS / 쓰기 TPS, 피크 배수}
-- **데이터 증가**: {일/월 증가량}
-
-#### 도출된 관심사 (규모 + 기능 기반)
-{3-2 논의 결과, 신경 써야 할 항목만 상세 기재}
-
-예시 (해당 항목만):
-- **동시성 제어**: 전략, 적용 대상, 충돌 처리, 선택 근거
-- **캐싱**: 캐시 대상, 전략, 무효화, TTL
-- **데이터 정합성**: 전략, 보상 트랜잭션, 멱등성
-- ...
-
-## Alternatives Considered
-
-### Option A: {대안 1}
-- **장점**: ...
-- **단점**: ...
-
-### Option B: {대안 2}
-- **장점**: ...
-- **단점**: ...
-
-## Consequences
-
-### Positive
-- {장점 1}
-- {장점 2}
-
-### Negative
-- {단점 1}
-- {단점 2}
-
-### Risks
-- {리스크 1}: {완화 방안}
-
-## Implementation Plan
-1. {구현 단계 1}
-2. {구현 단계 2}
-3. ...
-
-## Test Strategy
-- Unit Test: {domain 모듈 테스트}
-- Integration Test: {infra 모듈 테스트 + Testcontainers}
-- API Test: {app-api 모듈 테스트}
-- API Docs: {REST Docs 문서 테스트}
-
-## Performance Targets
-| 엔드포인트 | p95 | p99 | TPS | 에러율 |
-|-----------|-----|-----|-----|--------|
-| POST /api/v1/{resource} | {ms} | {ms} | {n}/s | < {n}% |
-| GET /api/v1/{resource}/{id} | {ms} | {ms} | {n}/s | < {n}% |
-| GET /api/v1/{resource} | {ms} | {ms} | {n}/s | < {n}% |
-
-- **예상 트래픽 패턴**: 조회 {n}% / 쓰기 {n}%
-- **k6 스크립트**: `perf-test/scripts/{도메인}/`
-- **검증**: 구현 완료 후 `/perf-test` 실행
-
-## Infrastructure
-- **Docker Services**: {추가되는 docker-compose 서비스}
-- **Configuration**: {application.yml 변경사항}
-- **Environment Variables**: {.env.example 추가 항목}
-```
 
 ---
 
