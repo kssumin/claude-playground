@@ -42,6 +42,13 @@ description: 성능 테스트 가이드. 목표 설정, 변수 분리 원칙, k6
 ### 7. 에러 분석
 - MUST: 에러율 0.01%라도 HTTP status별 분류 + 원인 기록
 
+## Step 0: 프로젝트 컨텍스트 확인
+
+`.claude/project-context.md`의 `## [perf-test-reference]` 섹션이 있으면 읽는다.
+- 추가 SLO (Consumer lag 등 프로젝트 특화 지표)
+- 목표 TPS 산출 공식
+- 프로젝트 특화 체크리스트 항목 (OSIV 실험, CDC 여부 등)
+
 ## SLO 기본값
 
 | 지표 | 임계치 | 근거 |
@@ -49,7 +56,8 @@ description: 성능 테스트 가이드. 목표 설정, 변수 분리 원칙, k6
 | p95 응답시간 | ≤ 200ms | 사용자 체감 한계 |
 | p99 응답시간 | ≤ 500ms | 이상치 허용 범위 |
 | 에러율 | ≤ 0.1% | 서비스 품질 기준 |
-| Consumer lag | ≤ 1,000 | 실시간 처리 기준 |
+
+> 프로젝트 추가 SLO (Consumer lag 등): `.claude/project-context.md → [perf-test-reference]` 섹션
 
 ## 실행 프로토콜
 
@@ -108,4 +116,4 @@ k6 p95 높음 → 어떤 엔드포인트? →
 | `references/k6-templates.md` | k6 스크립트 템플릿 (load/stress), 디렉토리 구조 |
 | `references/monitoring.md` | 필수 수집 지표, Grafana 대시보드 구성 |
 | `references/report-template.md` | 라운드별 결과 보고서 템플릿 |
-| `references/alarm-specific.md` | alarm 프로젝트 특화 가이드 (OSIV 분리, CDC, poll 공식) |
+| `.claude/project-context.md` | **프로젝트 특화**: TPS 목표/SLO/체크리스트 (OSIV, CDC, poll 공식 등) |

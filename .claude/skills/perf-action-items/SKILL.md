@@ -144,25 +144,14 @@ After: HttpComponentsClientHttpRequestFactory (maxTotal=100, maxPerRoute=20)
 
 ### ⛔ load 완료 직후 반드시 실행 (분석보다 먼저)
 
+**캡처 스크립트**: `.claude/project-context.md → [perf-tuning-cycle]` 섹션의 "Grafana 캡처 스크립트"를 실행한다.
+
 ```bash
-# load 완료 즉시 — 이 명령을 실행하지 않으면 Step 5로 진행 불가
 DIR="docs/perf-reports/{date}-action-{id}"
 mkdir -p "$DIR"
 
-python3 -c "
-import subprocess, os
-dir='$DIR'
-uid='spring_boot_21'; slug='spring-boot-3-x-statistics'
-TM='from=now-6m&to=now&width=1200&height=400&kiosk&theme=light'
-BASE=f'http://admin:admin@localhost:3000/render/d-solo/{uid}/{slug}'
-API='orgId=1&var-application=alarm-api&var-instance=host.docker.internal%3A8080&var-hikaricp=HikariPool-1'
-CON='orgId=1&var-application=alarm-consumer&var-instance=host.docker.internal%3A8082&var-hikaricp=HikariPool-1'
-panels=[(API,'36','api-hikaricp-connections.png'),(API,'2','api-response-time.png'),(API,'68','api-threads.png'),(CON,'36','consumer-hikaricp-connections.png'),(CON,'68','consumer-threads.png')]
-for vars,pid,name in panels:
-    r=subprocess.run(['curl','-sf',f'{BASE}?{vars}&panelId={pid}&{TM}','-o',f'{dir}/{name}'],capture_output=True)
-    size=os.path.getsize(f'{dir}/{name}') if os.path.exists(f'{dir}/{name}') else 0
-    print(f'{name}: {\"OK\" if r.returncode==0 and size>1000 else \"FAIL\"}')
-"
+# project-context.md의 캡처 스크립트 실행 (DIR 변수 위에서 설정 후)
+
 cp perf-test/results/{date}-action-{id}/k6-summary.json "$DIR/"
 
 # 캡처 확인 — 5개 미만이면 Step 5 진입 금지

@@ -32,26 +32,30 @@ Step 0 → reset → Step 1A(BEFORE) → Step 1.5 캡처 → reset → Step 1B(A
 
 ---
 
-## Step 0: 사전 검증 (GATE)
+## Step 0: 프로젝트 컨텍스트 로드
+
+`.claude/project-context.md`의 `## [perf-tuning-cycle]` 섹션이 있으면 읽는다.
+- Grafana 대시보드 UID, 패널 ID, 캡처 스크립트를 이 섹션에서 가져온다.
+- 없으면 Step 1 이후 단계에서 범용 방식(Grafana URL 직접 구성)으로 진행한다.
+
+## Step 0.5: 사전 검증 (GATE)
 
 **메트릭 미수집 + 환경 오염 상태에서 테스트 돌리면 분석 불가. 통과해야 Step 1 진행.**
 
 ```bash
 # 1. HikariCP 메트릭 노출 확인
-curl -sf http://localhost:{port}/actuator/prometheus | grep hikaricp_connections{
+curl -sf http://localhost:{api-port}/actuator/prometheus | grep hikaricp_connections{
 
-# 2. 환경 초기화 (DB + Redis + Kafka offset + binlog)
+# 2. 환경 초기화 (DB + Redis flush, Kafka offset)
 bash perf-test/reset-test-data.sh
 
-# 3. Kafka lag = 0 확인
-docker exec alarm-kafka /opt/kafka/bin/kafka-consumer-groups.sh \
-  --bootstrap-server localhost:9092 --describe --group alarm-consumer 2>&1 \
-  | awk '/alarm-notification-work/{lag+=$6} END{print "lag:", lag}'
-# → 0이어야 함
+# 3. Kafka 있는 경우: lag = 0 확인
+# project-context.md의 kafka consumer-group, work topic 참조
 ```
 
 > **⚠️ 앱 재시작 시 강화 웜업 필수**: 표준 smoke(50 TPS×3min)는 JVM JIT 임계치 미달.
-> 재시작 후엔 smoke 완료 후 100 TPS로 2분 추가 웜업 → 상세: `references/alarm-project.md`
+> 재시작 후엔 smoke 완료 후 100 TPS로 2분 추가 웜업.
+> 프로젝트별 웜업 절차: `project-context.md → [perf-tuning-cycle]` 섹션
 
 ---
 
@@ -84,7 +88,7 @@ docker compose --profile test run --rm \
 DIR="docs/perf-reports/{date}-{label}" && mkdir -p "$DIR"
 ```
 
-**alarm 프로젝트 캡처 스크립트**: `references/alarm-project.md` → "Grafana 캡처 스크립트" 섹션 실행
+**캡처 스크립트**: `.claude/project-context.md → [perf-tuning-cycle]` 섹션의 "Grafana 캡처 스크립트" 실행
 
 ```bash
 # 캡처 완료 확인 — 5개 미만이면 재실행
@@ -135,7 +139,7 @@ cp perf-test/results/{label}/k6-summary.json "$DIR/"
 
 | 문서 | 용도 |
 |------|------|
-| `references/alarm-project.md` | alarm 전용: 컨테이너명, UID, panelId, 캡처 스크립트, Prometheus 쿼리 |
+| `.claude/project-context.md` | **프로젝트 특화**: Grafana UID/panelId/캡처 스크립트/Prometheus 쿼리/TPS 목표 |
 | `references/analysis-guide.md` | Hidden Behavior + Bottleneck 체크리스트, 교차 분석 패턴 |
 | `references/diagnosis-guide.md` | Step 4 진단 절차, DIAGNOSIS.md 템플릿 |
 | `references/report-template.md` | REPORT.md + Action Items 형식 |
