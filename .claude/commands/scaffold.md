@@ -63,9 +63,15 @@ xxx-app-api/src/test/kotlin/com/xxx/api/{도메인명}/
 
 ## Workflow
 
+### Step 0: 프로젝트 컨텍스트 로드
+
+`.claude/project-context.md`의 `## [scaffold]` 섹션이 있으면 읽는다.
+- `package-root`, `module-prefix`, `base-patterns` 등 프로젝트 특화 설정을 사용한다.
+- 없으면 Step 1에서 직접 탐지한다.
+
 ### Step 1: 도메인 정보 수집
 1. 도메인명 확인 (영문 소문자, 단수형)
-2. 프로젝트 패키지명 탐지 (build.gradle.kts 또는 기존 코드에서)
+2. 프로젝트 패키지명 탐지 (project-context.md 또는 build.gradle.kts)
 3. 사용자에게 질문:
    - 주요 필드 (이름, 타입)
    - CRUD 중 필요한 기능
