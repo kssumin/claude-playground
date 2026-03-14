@@ -197,6 +197,60 @@ class TestSenderConfig {
   - 모듈 간 전달 메시지/DTO → 라운드트립 + 필드명 계약 + enum 커버리지
 ```
 
+## 모듈별 커버리지 목표
+
+| 모듈 | 목표 | 제외 대상 |
+|------|------|----------|
+| alarm-domain | **90%+** | — |
+| alarm-infra | **80%+** | Config 클래스, JPA Entity (직렬화 테스트로 보완) |
+| alarm-api | **80%+** | DTO 클래스 |
+| alarm-consumer | **80%+** | KafkaConfig (E2E로 검증) |
+| alarm-client-external | **80%+** | Config 클래스 |
+
+---
+
+## Testcontainers 싱글턴 컨테이너 패턴
+
+테스트 스위트 전체에서 컨테이너를 1회만 기동해 속도를 높인다.
+
+```kotlin
+abstract class IntegrationTestSupport {
+    companion object {
+        @JvmStatic
+        val mysql: MySQLContainer<*> = MySQLContainer("mysql:8.0")
+            .withDatabaseName("alarm_db")
+            .withReuse(true)  // ← 핵심
+
+        @JvmStatic
+        val kafka: KafkaContainer = KafkaContainer(DockerImageName.parse("apache/kafka:4.0.0"))
+            .withReuse(true)
+
+        @JvmStatic
+        val redis: GenericContainer<*> = GenericContainer("redis:7-alpine")
+            .withExposedPorts(6379)
+            .withReuse(true)
+
+        init { mysql.start(); kafka.start(); redis.start() }
+    }
+}
+```
+
+### 베이스 클래스 2종 선택
+
+| 클래스 | 롤백 | 사용 시나리오 |
+|--------|------|-------------|
+| `IntegrationTestSupport` | **없음** | Kafka→DB E2E (Consumer가 별도 tx로 커밋) |
+| `IntegrationTestSupportWithTx` | **@Transactional** | Repository 쿼리 단독 검증 |
+
+**함정**: E2E 테스트에서 `@Transactional` 롤백 베이스 클래스 쓰면 Consumer 커밋 데이터를 볼 수 없다.
+
+로컬 설정 (`~/.testcontainers.properties`):
+```properties
+testcontainers.reuse.enable=true
+```
+
+---
+
 ## 트러블슈팅
 
 1. 테스트 격리 확인 (독립 실행 가능한지)

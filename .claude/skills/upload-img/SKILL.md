@@ -1,11 +1,39 @@
 ---
 name: upload-img
-description: "이미지를 GitHub 저장소에 업로드하고 raw URL을 반환한다. Use when user says '/upload-img', '이미지 올려줘', 'PNG 업로드', or wants to upload performance test result images to GitHub."
+description: "이미지를 GitHub 저장소에 업로드하고 URL을 반환한다. Use when user says '/upload-img', '이미지 올려줘', 'PNG 업로드', or wants to upload performance test result images to GitHub."
 ---
 
 # upload-img
 
-이미지를 GitHub 저장소에 업로드하고 `raw.githubusercontent.com` URL을 반환한다.
+이미지를 GitHub에 업로드하고 URL을 반환한다.
+
+## ⚠️ Private 레포 주의사항
+
+**`raw.githubusercontent.com` URL은 private 레포에서 GitHub wiki 렌더러가 로드하지 못한다.**
+wiki에 이미지를 삽입할 경우 반드시 아래 **wiki 레포 직접 커밋** 방식을 사용한다.
+
+### Wiki 이미지 추가 방법 (Private 레포 권장)
+
+wiki 레포 자체에 이미지를 커밋하면 상대 경로로 참조 가능하고, wiki 렌더러가 인증 없이 제공한다.
+
+```bash
+# wiki 레포 클론 (최초 1회)
+git clone https://github.com/{owner}/{repo}.wiki.git /tmp/wiki-repo
+
+# 이미지 복사
+cp <이미지파일> /tmp/wiki-repo/perf-results/<폴더명>/
+
+# 커밋 & 푸시
+cd /tmp/wiki-repo
+git add . && git commit -m "docs: 이미지 추가" && git push
+```
+
+wiki 마크다운에서 참조:
+```markdown
+![설명](perf-results/<폴더명>/<파일명>.png)
+```
+
+이 방식은 public/private 레포 모두 작동한다.
 
 ## 사전 조건
 

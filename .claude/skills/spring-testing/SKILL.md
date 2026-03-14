@@ -5,6 +5,16 @@ description: Spring Boot + Kotlin testing patterns for multi-module projects. Us
 
 # Spring Boot 테스트 패턴
 
+## Step 0: 프로젝트 컨텍스트 로드
+
+`.claude/project-context.md`의 `## [testing]` 섹션이 있으면 읽는다.
+- Testcontainers 구성 (어떤 컨테이너, 어떤 이미지)
+- 테스트 데이터 팩토리 위치 및 패턴
+- 프로젝트 특화 테스트 규칙
+- 없으면 범용 패턴으로 진행.
+
+---
+
 ## 모듈별 테스트 전략
 
 ```

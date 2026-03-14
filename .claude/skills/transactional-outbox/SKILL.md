@@ -151,6 +151,13 @@ debezium:
 ```
 
 ### Connector 등록 (JSON)
+
+> **⚠️ MUST**: `include.schema.changes: false` + `snapshot.mode: no_data` 반드시 설정.
+> 미설정 시 Debezium이 DDL 이벤트(TRUNCATE 등)를 `topic.prefix` 토픽에 발행 시도.
+> 해당 토픽 미생성 + `auto.create.topics.enable=false` 조합이면 `UNKNOWN_TOPIC_OR_PARTITION` 무한 재시도 → 이후 DML(INSERT) 이벤트 블로킹.
+> 커넥터가 RUNNING이어도 메시지가 발행되지 않는 증상 발생.
+> 디버그: TRUNCATE 실행 후 `kafka-consumer-groups.sh` 로 LOG-END-OFFSET 확인 (0이면 블로킹 중).
+
 ```json
 {
   "name": "outbox-connector",
@@ -166,6 +173,8 @@ debezium:
     "database.include.list": "alarm_db",
     "table.include.list": "alarm_db.outbox_event",
     "topic.prefix": "alarm",
+    "include.schema.changes": "false",
+    "snapshot.mode": "no_data",
 
     "transforms": "outbox",
     "transforms.outbox.type": "io.debezium.transforms.outbox.EventRouter",
