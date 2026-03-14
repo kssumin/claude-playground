@@ -10,6 +10,9 @@
 ## Port 설계
 - MUST: 도메인 관점으로 정의 (OrderRepository, NOT OrderJpaRepository)
 - MUST: 인터페이스 분리 (ISP) — 역할별 Port 분리
+- MUST: Input Port(UseCase 인터페이스) 반드시 정의 — Controller는 UseCase 인터페이스에만 의존, Service 구현체 직접 의존 금지
+- MUST: Input Port는 `domain.usecase` 패키지, Output Port는 `domain.port` 패키지 — 혼용 금지
+- MUST: ArchUnit으로 Controller → service 패키지 직접 의존 차단 강제 (`ArchitectureTest`에 추가)
 
 ## API 설계
 - MUST: 자원 중심 (`POST /api/v1/orders`, NOT `POST /api/v1/createOrder`)
