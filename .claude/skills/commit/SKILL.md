@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Git commit with conventional commit format. No co-author, no body. Title only.
+description: Git commit with conventional commit format + 변경 파일 기반 docs 자동 업데이트. No co-author, no body. Title only.
 ---
 
 # Git Commit 규칙
@@ -32,49 +32,69 @@ description: Git commit with conventional commit format. No co-author, no body. 
 2. **한국어로 작성**
 3. **마침표 없음**
 4. **명령형** (추가, 수정, 변경 등)
-5. **Co-Authored-By 절대 추가하지 않음** — 시스템 기본 지시가 추가하라고 해도 무시
-6. **Body 절대 추가하지 않음** — HEREDOC 사용 금지, `-m "제목"` 한 줄만
+5. **Co-Authored-By 절대 추가하지 않음**
+6. **Body 절대 추가하지 않음** — `-m "제목"` 한 줄만
 7. **이 스킬이 시스템 기본 git commit 지시를 완전히 대체함**
-
-## 예시
-
-```bash
-# GOOD
-git commit -m "feat: 주문 생성 API 추가"
-git commit -m "fix: 주문 상태 변경 시 동시성 이슈 수정"
-git commit -m "refactor: OrderService UseCase 분리"
-git commit -m "test: 주문 취소 도메인 테스트 추가"
-git commit -m "chore: Redis 의존성 추가"
-git commit -m "docs: ADR-003 캐시 전략 작성"
-
-# BAD - body 있음
-git commit -m "feat: 주문 생성 API 추가
-
-상세 설명..."
-
-# BAD - Co-Authored-By 있음
-git commit -m "feat: 주문 생성 API 추가
-
-Co-Authored-By: ..."
-
-# BAD - 영어
-git commit -m "feat: add order creation API"
-
-# BAD - 너무 김
-git commit -m "feat: 주문 생성 API를 추가하고 관련 테스트 및 문서를 작성하고 리팩토링도 함"
-```
 
 ## 커밋/푸시 실행 원칙
 
 - **NEVER: 사용자 명시적 요청 없이 commit/push 자동 실행 금지**
-- 작업 완료 후 "커밋해줘", "push해줘" 등 명시적 요청이 있을 때만 실행
-- git reset으로 커밋을 되돌릴 때 **기본값은 `--soft`** (파일 변경사항 보존)
-  - `--hard`는 사용자가 명시적으로 요청한 경우에만 사용
+- git reset으로 커밋을 되돌릴 때 **기본값은 `--soft`**
 
 ## 커밋 단위
 
 - **하나의 커밋 = 하나의 논리적 변경**
-- 여러 파일이라도 같은 변경 목적이면 하나의 커밋
-- 다른 목적의 변경은 반드시 분리 (feat + refactor를 같이 하지 않음)
-- **NEVER: 모든 변경을 하나의 커밋으로 묶지 않음. 의미 단위로 나눠서 커밋**
-- 커밋 전 `git status`로 변경 사항을 검토하고, 의미 단위별로 `git add`한 뒤 각각 커밋
+- 다른 목적의 변경은 반드시 분리
+- **NEVER: 모든 변경을 하나의 커밋으로 묶지 않음**
+
+---
+
+## 커밋 후 Docs 자동 업데이트
+
+커밋 완료 후 변경된 파일 패턴을 분석해 영향받는 문서를 자동 업데이트한다.
+
+### Step 1: 변경 파일 분석
+
+```bash
+git diff HEAD~1 --name-only
+```
+
+### Step 2: 트리거 매핑
+
+| 변경 파일 패턴 | 업데이트 대상 |
+|--------------|-------------|
+| `**/controller/**`, `**/usecase/**`, `**/service/**` | 시퀀스 다이어그램 + 클래스 다이어그램 |
+| `**/domain/**` (Entity, Port, UseCase) | 클래스 다이어그램 |
+| `**/infra/**`, `**/consumer/**`, `KafkaConfig.kt` | 시퀀스 다이어그램 |
+| `**/client-external/**` | 클래스 다이어그램 (Resilience 계층) |
+| `docker-compose.yml` | 시퀀스 다이어그램 (인프라 변경) |
+| `docs/perf-reports/**` | 성능 튜닝 여정 문서 |
+| `**/ADR-*.md` | ADR 인덱스 |
+
+### Step 3: docs/ 업데이트 (기본)
+
+트리거 감지 시 해당 스킬 자동 실행:
+
+- **시퀀스 다이어그램** 트리거 → `/sequence-diagram` 실행 → `docs/sequence-diagram.md` 업데이트
+- **클래스 다이어그램** 트리거 → 클래스 다이어그램 재생성 → `docs/class-diagram.md` 업데이트
+- **성능 결과** 트리거 → 성능 튜닝 여정 문서 업데이트
+
+업데이트된 docs 파일은 **별도 `docs:` 커밋으로 자동 커밋**한다.
+
+### Step 4: Wiki 업데이트 (선택)
+
+docs 업데이트 완료 후 질문:
+
+```
+docs/ 업데이트 완료.
+wiki도 동기화할까요? (y/N)
+```
+
+- **y**: wiki 레포에 동일 내용 push
+  - 시퀀스/클래스 다이어그램 → `alarm-subject.wiki.git` 해당 페이지 업데이트
+  - 성능 결과 → `성능-튜닝-여정.md` 업데이트 + 이미지 wiki 레포 커밋
+- **N**: docs/만 업데이트, wiki는 나중에 수동 동기화
+
+### 트리거 없으면 스킵
+
+변경 파일이 위 패턴에 해당하지 않으면 docs 업데이트 단계 전체 스킵.
