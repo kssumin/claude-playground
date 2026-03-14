@@ -1,9 +1,8 @@
 ---
 name: sequence-diagram
 description: >
-  알림 시스템의 Mermaid 시퀀스 다이어그램을 생성한다.
-  발송 흐름(Outbox→CDC→Kafka→Consumer→외부API), 조회 흐름(Cursor 페이징+Redis 캐시),
-  파티션 보관 관리(RetentionScheduler), 전체 아키텍처를 포함한다.
+  코드베이스를 분석해 Mermaid 시퀀스 다이어그램을 생성·업데이트한다.
+  시스템 아키텍처, 주요 흐름(쓰기/읽기/비동기/에러), 배치/스케줄러 흐름을 포함한다.
   Use when user says "시퀀스 다이어그램", "sequence diagram", "다이어그램 그려줘",
   "다이어그램 작성", "/sequence-diagram", "docs/sequence-diagram.md 업데이트",
   or after major feature branch merges that change data flow.
@@ -11,54 +10,58 @@ description: >
 
 # 시퀀스 다이어그램 생성 스킬
 
-## Step 1: 대상 브랜치 확인
-
-작업할 브랜치를 확인한다.
+## Step 1: 변경 범위 파악
 
 ```bash
 git branch --show-current
-git log main..HEAD --oneline          # main 대비 추가된 커밋
-git diff main...HEAD --name-only      # 변경된 파일 목록
+git log main..HEAD --oneline
+git diff main...HEAD --name-only
 ```
 
-변경 파일을 보고 **어떤 다이어그램이 영향받는지** 판단한다.
+변경된 파일을 보고 **어떤 다이어그램이 영향받는지** 판단한다.
 
 | 변경 위치 | 영향받는 다이어그램 |
 |---------|----------------|
-| Controller / UseCase / Service | 발송 시퀀스, 조회 시퀀스 |
-| KafkaConfig / Consumer | 발송 시퀀스, retry/dead 시퀀스 |
-| infra/cache | 조회 시퀀스 |
-| batch / RetentionManager | 파티션 보관 관리 시퀀스 |
-| docker-compose / init.sql | 전체 아키텍처 |
+| Controller / UseCase / Service | 쓰기 시퀀스, 읽기 시퀀스 |
+| 메시지 큐 Config / Consumer | 비동기 발행·소비 시퀀스 |
+| Cache / Repository | 조회 시퀀스 |
+| Batch / Scheduler | 배치 시퀀스 |
+| docker-compose / infra | 전체 아키텍처 |
 
 ## Step 2: 코드 탐색
 
 영향받는 다이어그램에 필요한 파일을 읽는다.
 
-**항상 확인할 파일**
-- `alarm-consumer/src/main/resources/application.yml` — retry-backoff-ms, max-retry-attempts, CB 설정값
-- `alarm-infra/src/main/kotlin/.../kafka/KafkaConfig.kt` — ErrorHandler, FixedBackOff, notRetryableExceptions
-- `alarm-client-external/.../ResilienceConfig.kt` — CB threshold, sliding-window, Retry max-attempts
+**항상 확인**
+- 엔트리포인트(Controller / Consumer / Scheduler) — 흐름 시작점
+- 핵심 설정 파일(application.yml) — 타임아웃, 재시도, CB 설정값
+- 인프라 Config — 에러 핸들러, 백오프, notRetryableExceptions
 
-**조회 시퀀스 관련**
-- `alarm-api/.../usecase/NotificationUseCase.kt` — @Cacheable condition, cache key, evict 전략, CACHED_SIZES
-
-**파티션 관련**
-- `alarm-infra/.../NotificationRetentionManagerImpl.kt` — REORGANIZE / DROP 로직
-- `alarm-batch/.../RetentionScheduler.kt` — cron, try-catch 분리 여부
-- `alarm-infra/.../RetentionProperties.kt` — days 설정
+**추가로 확인 (흐름별)**
+- 쓰기: UseCase / Service → Repository → 이벤트 발행 경로
+- 읽기: Cache 전략(조건, 키 패턴, evict) → Repository
+- 비동기: 메시지 포맷, 재시도 레이어, DLQ 처리
+- 배치: cron 표현식, 각 단계 try-catch 독립성, 실패 시 알림 경로
 
 ## Step 3: 다이어그램 작성
 
-`docs/sequence-diagram.md`에 작성한다. 섹션 구성:
+`docs/sequence-diagram.md`에 작성한다.
+
+**섹션 구성 (프로젝트에 해당하는 섹션만 포함)**
 
 ```
-## 1. 전체 시스템 아키텍처        (graph TD)
-## 2. 알림 발송 시퀀스            (sequenceDiagram, retry 압축)
-## 2-1. retry / dead 상세 시퀀스  (retry 레이어 순서 명시)
-## 3. 알림 조회 시퀀스            (cursor + 캐시)
-## 4. 파티션 보관 관리 시퀀스     (RetentionScheduler)
+## 0. 클래스 다이어그램        (classDiagram — 새 도메인/아키텍처 변경 시만)
+## 1. 전체 시스템 아키텍처     (graph TD — 모듈·컴포넌트 관계)
+## 2. 쓰기 흐름               (sequenceDiagram — 주요 쓰기 경로)
+## 2-1. 에러/재시도 상세       (재시도 레이어 순서 명시)
+## 3. 읽기 흐름               (캐시 전략 포함)
+## 4. 배치/스케줄러 흐름       (주기적 작업)
 ```
+
+**클래스 다이어그램 생성 기준** (§0):
+- 새 도메인 추가, 모듈 구조 변경, Port/Adapter 추가 시
+- 4가지 관점 포함: ① 헥사고날 레이어 ② 도메인 모델 + 상태 전이 ③ Port & Adapter ④ 비동기 처리 흐름
+- 기존 `docs/class-diagram.md` 또는 Wiki `클래스-다이어그램` 페이지에 저장
 
 작성 규칙은 `references/diagram-rules.md` 참조.
 
