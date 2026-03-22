@@ -166,6 +166,7 @@ docs/adr/
 | `performance-reference` | 모델별 상세, 컨텍스트 윈도우 전략, 빌드 트러블슈팅 |
 | `skill-feedback` | 스킬 산출물에 대한 피드백을 원본 스킬에 일반화하여 반영 |
 | `pr-description` | PR 설명 작성 가이드 (diff 반복 금지, Problem→Solution→Design Decisions→Impact) |
+| `troubleshooting-doc` | 트러블슈팅 경험을 docs/troubleshooting/에 기록 (증상→증거→원인→해결→예방) |
 
 ## Rules
 
