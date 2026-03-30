@@ -118,6 +118,28 @@ status 값: `pending` | `in_progress` | `completed` | `blocked`
 
 **언제 사용하나**: 3개 이상의 독립 기능을 순서대로 구현할 때. 단일 기능은 exec-plans 파일만으로 충분.
 
+## Phase 4: Plan Review (CONFIRM 후 자동 실행)
+
+계획 저장 직후, 4개 리뷰어 에이전트를 **병렬**로 실행하여 플랜을 검증한다.
+
+```
+plan-architect-reviewer   plan-backend-reviewer
+        ↓                         ↓
+plan-infra-reviewer       plan-security-reviewer
+        ↓_________________________↓
+         통합 리뷰 결과 제시
+         CRITICAL 있으면 → 계획 수정 후 재검증
+         모두 PASS → /tdd 진행 승인
+```
+
+**실행 방법**: 저장된 계획 파일 경로를 각 리뷰어에게 전달
+```
+Agent(plan-architect-reviewer): "docs/exec-plans/active/{파일명} 리뷰해줘"
+Agent(plan-backend-reviewer): "docs/exec-plans/active/{파일명} 리뷰해줘"
+Agent(plan-infra-reviewer): "docs/exec-plans/active/{파일명} 리뷰해줘"
+Agent(plan-security-reviewer): "docs/exec-plans/active/{파일명} 리뷰해줘"
+```
+
 ## Integration
-- → `/tdd` (TDD로 구현)
-- → `/code-review` (리뷰)
+- → `/tdd` (Plan Review PASS 후 TDD로 구현)
+- → `/code-review` (구현 완료 후 리뷰)
