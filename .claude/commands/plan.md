@@ -28,7 +28,35 @@ allowed-tools: ["Read", "Grep", "Glob", "AskUserQuestion", "Task"]
 ### Phase 3: Confirmation
 - 완성된 계획 제시
 - **CONFIRM** 대기 (명시적 승인 필요)
-- CONFIRM 후 `docs/adr/implementation-plan-{번호}.md`로 저장
+- CONFIRM 후 `docs/exec-plans/active/{작업명}-plan.md`로 저장 (아래 형식 준수)
+
+### 실행 계획 파일 형식
+
+```markdown
+# {작업명} 실행 계획
+
+**시작일:** YYYY-MM-DD
+**상태:** IN_PROGRESS
+**마지막 세션:** YYYY-MM-DD
+
+## 목표
+...
+
+## 단계별 진행
+
+- [ ] Step 1: ...
+- [ ] Step 2: ...
+
+## 현재 세션 메모
+마지막으로 한 것:
+다음 세션에서 할 것:
+블로커:
+
+## 결정 기록
+...
+```
+
+**완료 시**: `docs/exec-plans/active/` → `docs/exec-plans/completed/`로 이동
 
 ## 구현 계획서 작성 원칙
 
@@ -69,6 +97,26 @@ Step 1 → Step 2 → Step 3 (검증 게이트)
 - "무엇을 바꾸는지"에 집중, 메서드 호출 체인은 구현 시점에 확인
 - BAD: "consumeWork → processor.process(msg.toDomain()) 에서 createdAt이 자연스럽게 전달됨"
 - GOOD: "Consumer에서 updateStatus 호출 시 createdAt을 Kafka 메시지에서 추출하여 전달"
+
+## 대규모 기능 — features.json 병행 사용
+
+단일 작업이 아닌 여러 기능을 순서대로 구현해야 할 때는 `docs/exec-plans/features.json`을 함께 생성한다.
+
+형식:
+```json
+[
+  {"id": 1, "name": "기능 이름", "status": "pending", "priority": "high", "note": ""},
+  {"id": 2, "name": "기능 이름", "status": "in_progress", "priority": "medium", "note": "현재 작업 중"},
+  {"id": 3, "name": "기능 이름", "status": "completed", "priority": "low", "note": ""}
+]
+```
+
+status 값: `pending` | `in_progress` | `completed` | `blocked`
+- 세션 시작 시 session-start.js가 자동으로 읽어 진행 상황을 보여줌
+- 기능 완료 시 status를 `completed`로 업데이트
+- 신규 기능 추가 시 배열에 append
+
+**언제 사용하나**: 3개 이상의 독립 기능을 순서대로 구현할 때. 단일 기능은 exec-plans 파일만으로 충분.
 
 ## Integration
 - → `/tdd` (TDD로 구현)

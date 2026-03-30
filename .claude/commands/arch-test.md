@@ -273,3 +273,27 @@ fun `Controller는 infra 패키지를 직접 참조하지 않는다`()
 6. domain → infra, client-external 참조 절대 금지
 7. app 모듈 간 상호 참조 금지 (api ↔ admin ↔ batch)
 ```
+
+---
+
+## 엔트로피 체크 타임스탬프 기록
+
+검사 완료 후 반드시 아래를 실행해 마지막 체크 시각을 기록한다.
+session-start.js가 이 파일을 읽어 7일 이상 체크 없으면 경고한다.
+
+```bash
+node -e "
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const claudeDir = path.join(os.homedir(), '.claude');
+if (!fs.existsSync(claudeDir)) fs.mkdirSync(claudeDir, { recursive: true });
+fs.writeFileSync(
+  path.join(claudeDir, 'last-entropy-check.json'),
+  JSON.stringify({ ts: Date.now(), project: process.env.CLAUDE_PROJECT_ROOT || process.cwd(), result: 'PASS' })
+);
+console.log('[arch-test] 엔트로피 체크 타임스탬프 기록 완료');
+"
+```
+
+위반이 있을 경우 `result: 'FAIL'`로 기록한다.

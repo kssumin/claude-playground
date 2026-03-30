@@ -107,6 +107,11 @@ common
 - 버그 발생 시 → `systematic-debugging` 스킬 자동 적용 (구조화된 디버깅)
 - 코드 리뷰 피드백 → `receiving-code-review` 스킬로 기술적 검증 후 반영
 
+### 하네스 유지보수
+- `/memory-distill` — failures/decisions → 스킬 승격 (session-start 경고 시 실행)
+- `/analyze-sessions` — 세션 로그 분석 → 반복 실패 패턴 + 하네스 개선 제언 (2주 이상 사용 후)
+- `/arch-test` — ArchUnit 검사 + 엔트로피 체크 타임스탬프 기록 (7일 주기 권장)
+
 ## ADR (Architecture Decision Records)
 
 기능 추가/아키텍처 변경 시 설계 결정을 문서화합니다.

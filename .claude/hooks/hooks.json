@@ -69,6 +69,36 @@
         "hooks": [
           {
             "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/arch-domain-check.js\""
+          }
+        ],
+        "description": "domain 모듈 .kt 편집 시 Spring infra 임포트 즉시 감지 (project-context.md의 domain 항목 기준)"
+      },
+      {
+        "matcher": "tool == \"Write\" && tool_input.file_path matches \"\\\\.kt$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/arch-domain-check.js\""
+          }
+        ],
+        "description": "domain 모듈 .kt 신규 생성 시 Spring infra 임포트 즉시 감지"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.kt$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/arch-unit-check.js\""
+          }
+        ],
+        "description": "ArchUnit 백그라운드 실행 (.kt 편집 시 트리거)"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.kt$\"",
+        "hooks": [
+          {
+            "type": "command",
             "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/kotlin-compile-check.js\""
           }
         ],
@@ -83,6 +113,16 @@
           }
         ],
         "description": "백그라운드 컴파일 완료 시 즉시 결과 피드백"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/arch-unit-result-check.js\""
+          }
+        ],
+        "description": "백그라운드 ArchUnit 완료 시 즉시 결과 피드백"
       },
       {
         "matcher": "tool == \"Bash\" && tool_input.command matches \"gh pr create\"",
@@ -161,6 +201,16 @@
           }
         ],
         "description": "응답 후 디버그 로그 검사"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/pre-completion-check.js\""
+          }
+        ],
+        "description": "[A] arch/compile 미검증 경고 + [B] exec-plans 업데이트 리마인더 (.kt 편집 세션에서만 발동)"
       }
     ]
   }
