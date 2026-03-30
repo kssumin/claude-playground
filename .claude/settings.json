@@ -50,7 +50,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/suggest-compact.js\""
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); node \"$ROOT/.claude/hooks/scripts/hooks/suggest-compact.js\""
           }
         ],
         "description": "주기적으로 /compact 제안"
@@ -62,7 +62,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/loop-detect.js\""
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); node \"$ROOT/.claude/hooks/scripts/hooks/loop-detect.js\""
           }
         ],
         "description": "동일 파일 반복 편집 감지 (5회 이상 경고)"
@@ -72,7 +72,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/arch-domain-check.js\""
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); node \"$ROOT/.claude/hooks/scripts/hooks/arch-domain-check.js\""
           }
         ],
         "description": "domain 모듈 .kt 편집 시 Spring infra 임포트 즉시 감지"
@@ -82,7 +82,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/arch-unit-check.js\""
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); node \"$ROOT/.claude/hooks/scripts/hooks/arch-unit-check.js\""
           }
         ],
         "description": "ArchUnit 백그라운드 실행 (.kt 편집 시 트리거)"
@@ -92,7 +92,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/kotlin-compile-check.js\""
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); node \"$ROOT/.claude/hooks/scripts/hooks/kotlin-compile-check.js\""
           }
         ],
         "description": "Kotlin 파일 편집 후 백그라운드 컴파일 체크"
@@ -102,7 +102,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/compile-result-check.js\""
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); node \"$ROOT/.claude/hooks/scripts/hooks/compile-result-check.js\""
           }
         ],
         "description": "백그라운드 컴파일 완료 시 즉시 결과 피드백"
@@ -112,7 +112,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/arch-unit-result-check.js\""
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); node \"$ROOT/.claude/hooks/scripts/hooks/arch-unit-result-check.js\""
           }
         ],
         "description": "백그라운드 ArchUnit 완료 시 즉시 결과 피드백"
@@ -132,7 +132,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/check-outbox-entity.sh\""
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); bash \"$ROOT/.claude/hooks/check-outbox-entity.sh\""
           }
         ],
         "description": "Outbox Entity 필수 필드 검증 (@Id, aggregateId, processed)"
@@ -142,7 +142,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/check-consumer-idempotency.sh\""
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); bash \"$ROOT/.claude/hooks/check-consumer-idempotency.sh\""
           }
         ],
         "description": "Kafka Consumer 멱등성 체크 누락 감지"
@@ -174,7 +174,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/pre-compact.js\""
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); node \"$ROOT/.claude/hooks/scripts/hooks/pre-compact.js\""
           }
         ],
         "description": "컨텍스트 압축 전 상태 저장"
@@ -186,7 +186,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/session-start.js\""
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); node \"$ROOT/.claude/hooks/scripts/hooks/session-start.js\""
           }
         ],
         "description": "세션 시작 시 프로젝트 정보 로드"
@@ -198,7 +198,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/session-end.js\""
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); node \"$ROOT/.claude/hooks/scripts/hooks/session-end.js\""
           }
         ],
         "description": "세션 종료 시 상태 저장"
@@ -210,7 +210,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/check-debug-logs.js\""
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); node \"$ROOT/.claude/hooks/scripts/hooks/check-debug-logs.js\""
           }
         ],
         "description": "응답 후 디버그 로그 검사"
@@ -220,7 +220,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_ROOT}/.claude/hooks/scripts/hooks/pre-completion-check.js\""
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); node \"$ROOT/.claude/hooks/scripts/hooks/pre-completion-check.js\""
           }
         ],
         "description": "arch/compile 미검증 시 경고 + exec-plans 업데이트 리마인더"
